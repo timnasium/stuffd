@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_nord_theme/flutter_nord_theme.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:stuffd/category/category.dart';
 import 'package:stuffd/utils/database_manager.dart';
+import 'package:stuffd/widget/stuffd_button.dart';
 
 class CategoryForm extends StatelessWidget {
   // In the constructor, require a Todo.
@@ -39,7 +41,7 @@ class CategoryForm extends StatelessWidget {
       if (category != null) {
         return <Widget>[
           IconButton(
-            icon: Icon(LineAwesomeIcons.trash, size: 40),
+            icon: Icon(LineAwesomeIcons.trash, size: 30),
             tooltip: "Delete",
             color: NordColors.aurora.red,
             onPressed: () {
@@ -55,11 +57,10 @@ class CategoryForm extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          title,
-          textScaleFactor: 2.4,
+          title
         ),
         leading: IconButton(
-          icon: Icon(LineAwesomeIcons.chevron_circle_left, size: 40),
+          icon: Icon(LineAwesomeIcons.chevron_circle_left, size: 30),
           tooltip: "Back",
           color: NordColors.frost.lightest,
           onPressed: () {
@@ -68,74 +69,79 @@ class CategoryForm extends StatelessWidget {
         ),
         actions: categoryActions(),
         centerTitle: true,
-        toolbarHeight: 125,
+
       ),
+      bottomSheet: SizedBox(
+          height: 80,
+          child: ListTile(
+             contentPadding: EdgeInsets.fromLTRB(50,10,50,15),
+              title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                        child: StuffdButton(
+                            text: "Reset",
+                            onPressed: () {
+                              _formKey.currentState?.reset();
+                              FocusScope.of(context).unfocus();
+                            })),
+                    const SizedBox(width: 50),
+                    Expanded(
+                        child: StuffdButton(
+                      text: "Submit",
+                      onPressed: () async {
+                        final validated = _formKey.currentState?.validate();
+
+                        if (validated ?? false) {
+                          _formKey.currentState?.save();
+                          final allVals = _formKey.currentState?.value;
+
+                          var saveCategory = new Category(
+                              id: newCategory.id,
+                              name: _formKey.currentState?.value['nameField'],
+                              matches:
+                                  _formKey.currentState?.value['matchesField']);
+                          if (newCategory.id <= 0) {
+                            await db.addCategory(saveCategory);
+                          } else {
+                            await db.updateCategory(saveCategory);
+                          }
+
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              duration: const Duration(seconds: 4),
+                              content: Text('Saved!')));
+                          Navigator.of(context).pop();
+                        }
+                        FocusScope.of(context).unfocus();
+                      },
+                    )),
+                  ]))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: FormBuilder(
           key: _formKey,
-          child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-            FormBuilderTextField(
-              name: 'nameField',
-              validator: FormBuilderValidators.required(context),
-              valueTransformer: (value) {
-                return value?.trim();
-              },
-            ),
-            FormBuilderTextField(name: 'matchesField'),
-            const SizedBox(height: 20),
-            Expanded(child: Container()),
-            ListTile(
-                contentPadding: EdgeInsets.all(50),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                      Expanded(
-                        child: 
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(primary: NordColors.$2),
-                        //Reset Button
-                        onPressed: () {
-                          _formKey.currentState?.reset();
-                          FocusScope.of(context).unfocus();
-                        },
-                        child: const Text('Reset', textScaleFactor: 2.5,))
-                ),
-                const SizedBox(width: 50),
-                  Expanded(
-                        child: 
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(primary: NordColors.$2),
-                        //Submit Button
-                        onPressed: () async {
-                          final validated = _formKey.currentState?.validate();
-
-                          if (validated ?? false) {
-                            _formKey.currentState?.save();
-                            final allVals = _formKey.currentState?.value;
-
-                            var saveCategory = new Category(
-                                id: newCategory.id,
-                                name: _formKey.currentState?.value['nameField'],
-                                matches: _formKey
-                                    .currentState?.value['matchesField']);
-                            if (newCategory.id <= 0) {
-                              await db.addCategory(saveCategory);
-                            } else {
-                              await db.updateCategory(saveCategory);
-                            }
-
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                duration: const Duration(seconds: 4),
-                                content: Text('Saved!')));
-                            Navigator.of(context).pop();
-                          }
-                          FocusScope.of(context).unfocus();
-                        },
-                        child: const Text('Submit', textScaleFactor: 2.5,))),
-                  ],
-                ))
-          ]),
+          child: SingleChildScrollView(
+            child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+              FormBuilderTextField(
+                name: 'nameField',
+                validator: FormBuilderValidators.required(),
+                valueTransformer: (value) {
+                  return value?.trim();
+                },
+                 decoration: InputDecoration(
+                      labelText: 'Name',
+                    ),
+              ),
+              FormBuilderTextField(name: 'matchesField',minLines: 5,maxLines: 15,
+               decoration: InputDecoration(
+                      labelText: 'Matches',
+                       helperText: 'Category response matches, separated by a |',
+                    ),),
+              const SizedBox(height: 160),
+              
+              
+            ]),
+          ),
           autovalidateMode: AutovalidateMode.onUserInteraction,
           initialValue: {
             'nameField': newCategory.name,

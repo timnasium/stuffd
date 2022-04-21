@@ -26,13 +26,13 @@ class TabBarWidget extends StatelessWidget {
           shadowColor: NordColors.$0,
           centerTitle: true,
           titleTextStyle: GoogleFonts.spicyRice(
-              fontWeight: FontWeight.normal, fontSize: 50.0, color: NordColors.frost.lightest),
+              fontWeight: FontWeight.normal, fontSize: 40.0, color: NordColors.frost.lightest),
           bottom: TabBar(
             isScrollable: true,
             indicatorWeight: 5,
             tabs: tabs,
             indicatorColor: NordColors.aurora.purple,
-            labelStyle: GoogleFonts.secularOne( fontWeight: FontWeight.normal, fontSize: 16.0),
+            labelStyle: GoogleFonts.secularOne( fontWeight: FontWeight.normal, fontSize: 12.0),
           ),
         ),
         body: Column(

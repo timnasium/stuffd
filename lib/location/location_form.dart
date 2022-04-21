@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_nord_theme/flutter_nord_theme.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:stuffd/location/location.dart';
 import 'package:stuffd/utils/database_manager.dart';
+import 'package:stuffd/widget/stuffd_button.dart';
 
 class LocationForm extends StatelessWidget {
   // In the constructor, require a Todo.
@@ -39,7 +41,7 @@ class LocationForm extends StatelessWidget {
       if (location != null) {
         return <Widget>[
           IconButton(
-            icon: Icon(LineAwesomeIcons.trash, size: 40),
+            icon: Icon(LineAwesomeIcons.trash, size: 30),
             tooltip: "Delete",
             color: NordColors.aurora.red,
             onPressed: () {
@@ -54,11 +56,13 @@ class LocationForm extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title, textScaleFactor: 2.4,),
+        title: Text(
+          title
+        ),
         leading: IconButton(
           icon: Icon(
             LineAwesomeIcons.chevron_circle_left,
-            size: 40,
+            size: 30,
           ),
           tooltip: "Back",
           color: NordColors.frost.lightest,
@@ -68,85 +72,84 @@ class LocationForm extends StatelessWidget {
         ),
         actions: locationActions(),
         centerTitle: true,
-        toolbarHeight: 125,
+       
       ),
+      bottomSheet: SizedBox(
+          height: 80,
+          child: ListTile(
+              contentPadding: EdgeInsets.fromLTRB(50,10,50,15),
+              title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: StuffdButton(
+                        text: "Reset",
+                        onPressed: () {
+                          _formKey.currentState?.reset();
+                          FocusScope.of(context).unfocus();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 50),
+                    Expanded(
+                      child: StuffdButton(
+                        text: "Submit",
+                        onPressed: () async {
+                          final validated = _formKey.currentState?.validate();
+
+                          if (validated ?? false) {
+                            _formKey.currentState?.save();
+                            final allVals = _formKey.currentState?.value;
+
+                            var saveLocation = new Location(
+                                id: newLocation.id,
+                                name: _formKey.currentState?.value['nameField'],
+                                description: _formKey
+                                    .currentState?.value['descriptionField']);
+                            if (newLocation.id <= 0) {
+                              await db.addLocation(saveLocation);
+                            } else {
+                              await db.updateLocation(saveLocation);
+                            }
+
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                duration: const Duration(seconds: 4),
+                                content: Text('Saved!')));
+                            Navigator.of(context).pop();
+                          }
+                          FocusScope.of(context).unfocus();
+                        },
+                      ),
+                    ),
+                  ]))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: FormBuilder(
           key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              FormBuilderTextField(
-                name: 'nameField',
-                validator: FormBuilderValidators.required(context),
-                valueTransformer: (value) {
-                  return value?.trim();
-                },
-                decoration: InputDecoration(
-                  labelText: 'Name',
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                FormBuilderTextField(
+                  name: 'nameField',
+                  validator: FormBuilderValidators.required(),
+                  valueTransformer: (value) {
+                    return value?.trim();
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                  ),
                 ),
-              ),
-              FormBuilderTextField(
-                name: 'descriptionField',
-                decoration: InputDecoration(
-                  labelText: 'Description',
+                FormBuilderTextField(
+                  name: 'descriptionField',
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                  ),
                 ),
-              ),
-              
-              Expanded(child: Container()),
-              ListTile(
-                  contentPadding: EdgeInsets.all(50),
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                           style:ElevatedButton.styleFrom(primary: NordColors.$2),
-                            //Reset Button
-                            onPressed: () {
-                              _formKey.currentState?.reset();
-                              FocusScope.of(context).unfocus();
-                            },
-                            child: const Text('Reset', textScaleFactor: 2.5,)),
-                      ),
-                       const SizedBox(width: 50),
-                      Expanded(
-                        child: ElevatedButton(
-                          style:ElevatedButton.styleFrom(primary: NordColors.$2),
-                            //Submit Button
-                            onPressed: () async {
-                              final validated = _formKey.currentState?.validate();
-
-                              if (validated ?? false) {
-                                _formKey.currentState?.save();
-                                final allVals = _formKey.currentState?.value;
-
-                                var saveLocation = new Location(
-                                    id: newLocation.id,
-                                    name:
-                                        _formKey.currentState?.value['nameField'],
-                                    description: _formKey
-                                        .currentState?.value['descriptionField']);
-                                if (newLocation.id <= 0) {
-                                  await db.addLocation(saveLocation);
-                                } else {
-                                  await db.updateLocation(saveLocation);
-                                }
-
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        duration: const Duration(seconds: 4),
-                                        content: Text('Saved!')));
-                                Navigator.of(context).pop();
-                              }
-                              FocusScope.of(context).unfocus();
-                            },
-                            child: const Text('Submit', textScaleFactor: 2.5,)),
-                      ),
-                    ],
-                  ))
-            ],
+          
+                  SizedBox(height: 160),
+              ],
+            ),
           ),
           autovalidateMode: AutovalidateMode.onUserInteraction,
           initialValue: {

@@ -12,6 +12,7 @@ import 'package:stuffd/thing/thing_form.dart';
 import 'package:stuffd/thing/upc_response.dart';
 import 'package:stuffd/utils/database_manager.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:stuffd/widget/stuffd_button.dart';
 
 class ThingUPC extends StatelessWidget {
   // In the constructor, require a Todo.
@@ -39,6 +40,7 @@ class ThingUPC extends StatelessWidget {
         await Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => ThingForm(
             thingResponse: info,
+            scansLeft: int.parse(limit!),
           ),
         ));
       }
@@ -60,9 +62,9 @@ class ThingUPC extends StatelessWidget {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text("Add thing",textScaleFactor: 2.4,),
+          title: Text("Add thing"),
           leading: IconButton(
-            icon: Icon(LineAwesomeIcons.chevron_circle_left, size: 40),
+            icon: Icon(LineAwesomeIcons.chevron_circle_left, size: 30),
             tooltip: "Back",
             color: NordColors.frost.lightest,
             onPressed: () {
@@ -70,8 +72,36 @@ class ThingUPC extends StatelessWidget {
             },
           ),
           centerTitle: true,
-          toolbarHeight: 125,
+        
         ),
+         bottomSheet:SizedBox(
+          height: 80,
+          child: ListTile(
+                 contentPadding: EdgeInsets.fromLTRB(50,10,50,15),
+                title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Expanded(
+                        child: StuffdButton(
+                   
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .pushReplacement(MaterialPageRoute(
+                                builder: (context) => ThingForm(),
+                              ));
+                            },
+                            text: "Manual Entry"),
+                      ),
+                        const SizedBox(width: 25),
+                      Expanded(
+                        child: StuffdButton(
+                           
+                            onPressed: lookUpUpc,
+                            text: "Look it up!"),
+                      )
+                    ]),
+              )),
+
         body: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(children: [
@@ -86,35 +116,8 @@ class ThingUPC extends StatelessWidget {
                   UpcValue = text;
                 },
               ),
-              Expanded(child: Container()),
-              ListTile(
-                contentPadding: EdgeInsets.all(50),
-                title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                primary: NordColors.$2),
-                            onPressed: () {
-                              Navigator.of(context)
-                                  .pushReplacement(MaterialPageRoute(
-                                builder: (context) => ThingForm(),
-                              ));
-                            },
-                            child: Text("Enter it Manually",
-                                textScaleFactor: 2.5)),
-                      ),
-                        const SizedBox(width: 50),
-                      Expanded(
-                        child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                primary: NordColors.$2),
-                            onPressed: lookUpUpc,
-                            child: Text("Look it up!", textScaleFactor: 2.5)),
-                      )
-                    ]),
-              )
+              
+             
             ])));
   }
 }

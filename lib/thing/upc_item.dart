@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stuffd/helpers/httpHelper.dart';
 import 'package:stuffd/thing/thing.dart';
 import 'package:stuffd/utils/database_manager.dart';
 
@@ -30,11 +32,13 @@ class Item {
 
   Future<Thing> toThing() async {
     var name = cleanName(this.title!);
-    var imgUrl='';
-    if(this.images!.isNotEmpty){
-      imgUrl=this.images![0];
+    var imgUrl = '';
+
+    if (images!.isNotEmpty) {
+      imgUrl = await findImage(images!);
     }
-    var catId =await findCategory(this.category!);
+
+    var catId = await findCategory(this.category!);
     return new Thing(
         id: 0,
         name: name,
@@ -44,7 +48,7 @@ class Item {
         ean: this.ean ?? "",
         upc: this.upc ?? "",
         imageUrl: imgUrl,
-        dateAdded:DateTime.now().millisecondsSinceEpoch,
+        dateAdded: DateTime.now().millisecondsSinceEpoch,
         locationId: 0,
         categoryId: catId);
   }
@@ -63,12 +67,30 @@ class Item {
   }
 
   static Future<int> findCategory(String t) async {
-
-   var db = DatabaseManager.instance;
-  var cats = await db.getCategoriesByType(t);
-  if(cats.isNotEmpty){
-    return cats[0].id;
-  }
+    var db = DatabaseManager.instance;
+    var cats = await db.getCategoriesByType(t);
+    if (cats.isNotEmpty) {
+      return cats[0].id;
+    }
     return 0;
+  }
+
+  static Future<String> findImage(List<String> images) async {
+    var imgUrl = '';
+
+    for (var i in images) {
+      try {
+        var r = await httpGet(Uri.parse(i));
+        if (r.statusCode == 200) {
+         
+         
+          if ( r.bodyBytes.length > 100) {
+            imgUrl = i;
+            break;
+          }
+        }
+      } catch (e) {}
+    }
+    return imgUrl;
   }
 }
