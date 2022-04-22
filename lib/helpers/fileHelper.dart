@@ -4,14 +4,23 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:file_picker/file_picker.dart';
 
-Future<File?> getFile() async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles();
+Future<File?> getImageFile() async {
+  FilePickerResult? result = await FilePicker.platform
+      .pickFiles(type: FileType.image);
 
   if (result != null) {
     File file = File(result.files.single.path!);
     return file;
   } else {
     return null;
+  }
+}
+
+Image imageFromBase64OrURL(String s) {
+  if (Uri.parse(s).host.isNotEmpty) {
+    return Image.network(s);
+  } else {
+    return imageFromBase64String(s);
   }
 }
 

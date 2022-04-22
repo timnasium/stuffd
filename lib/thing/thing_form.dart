@@ -32,6 +32,9 @@ class ThingForm extends StatefulWidget {
 class _ThingFormState extends State<ThingForm> {
   bool isLoading = true;
   Thing? upcThing;
+  String imgUrl = '';
+  bool clearImg = false;
+  String originalImg = '';
   List<Location>? locations;
   List<Category>? categories;
 
@@ -47,7 +50,6 @@ class _ThingFormState extends State<ThingForm> {
 
   @override
   Widget build(BuildContext context) {
-    String imgUrl = '';
     Thing newThing;
 
     Future deleteThing() async {
@@ -79,10 +81,16 @@ class _ThingFormState extends State<ThingForm> {
     } else {
       if (widget.thing != null) {
         newThing = widget.thing!;
-        imgUrl = widget.thing!.imageUrl;
+        if (imgUrl.isEmpty) {
+          imgUrl = widget.thing!.imageUrl;
+          originalImg = imgUrl;
+        }
       } else if (widget.thingResponse != null) {
         newThing = upcThing!;
-        imgUrl = newThing.imageUrl;
+        if (imgUrl.isEmpty) {
+          imgUrl = newThing.imageUrl;
+          originalImg = imgUrl;
+        }
       } else {
         newThing = new Thing(
             id: 0,
@@ -97,6 +105,10 @@ class _ThingFormState extends State<ThingForm> {
             categoryId: 0,
             locationId: 0);
       }
+      if (clearImg) {
+        imgUrl = '';
+      }
+
       var title = 'New Item';
       if (widget.thing != null) {
         title = widget.thing!.name;
@@ -123,7 +135,7 @@ class _ThingFormState extends State<ThingForm> {
         bottomSheet: SizedBox(
           height: 80,
           child: ListTile(
-              contentPadding: EdgeInsets.fromLTRB(50,10,50,15),
+              contentPadding: EdgeInsets.fromLTRB(50, 10, 50, 15),
               title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -132,6 +144,11 @@ class _ThingFormState extends State<ThingForm> {
 
                             //Reset Button
                             onPressed: () {
+                              setState(() {
+                                clearImg = false;
+                                imgUrl = originalImg;
+                              });
+
                               _formKey.currentState?.reset();
                               FocusScope.of(context).unfocus();
                             },
@@ -193,6 +210,7 @@ class _ThingFormState extends State<ThingForm> {
         floatingActionButton: upcThing == null
             ? null
             : FloatingActionButton(
+              heroTag: "devInfo",
                 onPressed: () async {
                   showModalBottomSheet<void>(
                       context: context,
@@ -205,32 +223,30 @@ class _ThingFormState extends State<ThingForm> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                             Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
                                     IconButton(
-                                          color: NordColors.aurora.purple,
-                                          onPressed: () => Clipboard.setData(
-                                              ClipboardData(
-                                                  text: widget.thingResponse!
-                                                      .items![0].category!)),
-                                          icon: Icon(LineAwesomeIcons.copy)),
-                                        SizedBox(
-                                           width: MediaQuery.of(context).size.width * 0.65,
-                                           
-                                          child: Text('Category: ' +
-                                                widget.thingResponse!.items![0]
-                                                    .category!,
-                                                    softWrap: true,
-                                                   overflow: TextOverflow.ellipsis,
-     maxLines: 2,),
-                                        ),
-                                       
-                                    
-                                     
-                                    ],
-                                  ),
-                                  
+                                        color: NordColors.aurora.purple,
+                                        onPressed: () => Clipboard.setData(
+                                            ClipboardData(
+                                                text: widget.thingResponse!
+                                                    .items![0].category!)),
+                                        icon: Icon(LineAwesomeIcons.copy)),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.65,
+                                      child: Text(
+                                        'Category: ' +
+                                            widget.thingResponse!.items![0]
+                                                .category!,
+                                        softWrap: true,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 SizedBox(
                                   height: 25,
                                 ),
@@ -346,25 +362,58 @@ class _ThingFormState extends State<ThingForm> {
 
                   SizedBox(height: 20),
 
-                  imgUrl.isNotEmpty?
-                  Container(
-                    child: ClipRRect(
-                      child: Image.network(imgUrl),
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width *.8,
-                        maxHeight: 500,
-                        minHeight: 150),
-                  ):
-                  Column(
-                    children: [
-                      Text('Load your own image'),
-                      ElevatedButton(onPressed: (){
-                        getFile();
-                      }, child: Text("Select an Image")),
-                    ],
-                  ),//No Image
+                  imgUrl.isNotEmpty
+                      ? Stack(
+                          alignment: AlignmentDirectional.topEnd,
+                          children: [
+                            Container(
+                              child: ClipRRect(
+                                child: imageFromBase64OrURL(imgUrl),
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * .8,
+                                  maxHeight: 500,
+                                  minHeight: 150),
+                            ),
+                            FloatingActionButton(
+                              heroTag: "removeImage",
+                              mini: true,
+                              backgroundColor: NordColors.aurora.red,
+                              child: const Icon(
+                                LineAwesomeIcons.times,
+                                color: NordColors.$0,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  clearImg = true;
+                                });
+                              },
+                            ),
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            Text('Load your own image'),
+                            SizedBox(
+                              width: 300,
+                              child: StuffdButton(
+                                  text: "Select an Image",
+                                  onPressed: () async {
+                                    var f = await getImageFile();
+                                    if (f != null) {
+                                      var b64 = base64StringFromFile(f);
+                                      setState(() {
+                                        clearImg = false;
+                                        imgUrl = b64;
+                                      });
+                                    }
+                                  }),
+                            ),
+                          ],
+                        ), //No Image
                   SizedBox(height: 160),
                 ],
               ),
