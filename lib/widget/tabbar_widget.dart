@@ -17,7 +17,7 @@ class TabBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DefaultTabController(
       length: tabs.length,
-      child: SafeArea(
+      child:  SafeArea(
           child: Scaffold(
         //backgroundColor: StuffdColors.bgColorScreen,
 

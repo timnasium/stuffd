@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:stuffd/helpers/loader.dart';
+import 'package:stuffd/settings/setting_list.dart';
 import 'package:stuffd/thing/thing_list.dart';
 import 'package:stuffd/utils/database_manager.dart';
 import 'package:stuffd/widget/tabbar_widget.dart';
@@ -70,6 +71,8 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) => 
+  Scaffold(
+    body:
        TabBarWidget(
         title: MyApp.title,
         tabs: [
@@ -82,7 +85,7 @@ class _MainPageState extends State<MainPage> {
           ThingList(),
           LocationList(),
           CategoryList(),
-         Loader(),
+         SettingsList(),
         ],
-      );
+     ));
 }
