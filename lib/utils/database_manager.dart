@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stuffd/category/category.dart';
+import 'package:stuffd/export_import/export.dart';
 import 'package:stuffd/location/location.dart';
 import 'package:stuffd/thing/thing.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -244,5 +245,36 @@ class DatabaseManager {
         id: 0,
         name: "Music",
         matches: "Media > Music & Sound Recordings > Music CDs|Electronics"));
+  }
+
+  Future<List<ExportItem>> getExport() async {
+    Database database = _database!;
+    List<Map<String, dynamic>> maps;
+
+    maps = await database.rawQuery('''
+SELECT 
+		things.id,
+      things.name,
+      normalName,
+      things.description,
+      brand,
+      ean,
+      upc,
+      imageUrl,
+      dateAdded,
+      locationId,
+      IFNULL(locations.name,'') as locationName,
+      categoryId,
+      IFNULL(categories.name,'')  AS categoryName
+FROM things
+LEFT OUTER JOIN locations ON things.locationId = locations.id
+LEFT OUTER JOIN categories ON things.categoryId = categories.id
+''');
+
+    if (maps.isNotEmpty) {
+      return maps.map((map) => ExportItem.fromDbMap(map)).toList();
+    }
+
+    return new List.empty();
   }
 }

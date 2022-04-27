@@ -11,7 +11,7 @@ class Loader extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Container(
-          constraints: BoxConstraints(minWidth: 100, maxWidth: 200),
+          constraints: BoxConstraints(minWidth: 100, maxWidth: 200, minHeight: 400),
           child: LoadingIndicator(
             indicatorType: Indicator.ballGridBeat,
             colors: [
