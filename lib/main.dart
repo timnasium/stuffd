@@ -24,9 +24,6 @@ void main() async {
   var db = await DatabaseManager.instance.database;
 
   runApp(MyApp());
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    statusBarColor: NordColors.$2,
-  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -41,24 +38,17 @@ class MyApp extends StatelessWidget {
         bottomSheetTheme: BottomSheetThemeData(
             backgroundColor: NordColors.polarNight.darker.withOpacity(.75)),
         textTheme: GoogleFonts.coustardTextTheme().apply(
-          
           bodyColor: NordColors.snowStorm.darkest,
           displayColor: NordColors.snowStorm.darkest,
-                    
         ),
       ),
-      
-  supportedLocales: [
-       
+      supportedLocales: [
         Locale('en'),
-       
       ],
       localizationsDelegates: [
-
         FormBuilderLocalizations.delegate,
       ],
       home: MainPage(),
-      
     );
   }
 }
@@ -70,22 +60,36 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   @override
-  Widget build(BuildContext context) => 
-  Scaffold(
-    body:
-       TabBarWidget(
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(
+        shadowColor: Colors.transparent,
+        toolbarHeight: double.minPositive,
+      ),
+      body: TabBarWidget(
         title: MyApp.title,
         tabs: [
-          Tab(icon: Icon(LineAwesomeIcons.box,size:30, color: NordColors.aurora.orange), text: 'My Stuff'),
-          Tab(icon: Icon(LineAwesomeIcons.map_marked,size:30, color: NordColors.aurora.green), text: 'Locations'),
-          Tab(icon: Icon(LineAwesomeIcons.tags,size:30, color: NordColors.aurora.red), text: 'Categories'),
-          Tab(icon: Icon(LineAwesomeIcons.cog,size:30, color: NordColors.aurora.yellow), text: 'Settings'),
+          Tab(
+              icon: Icon(LineAwesomeIcons.box,
+                  size: 30, color: NordColors.aurora.orange),
+              text: 'My Stuff'),
+          Tab(
+              icon: Icon(LineAwesomeIcons.map_marked,
+                  size: 30, color: NordColors.aurora.green),
+              text: 'Locations'),
+          Tab(
+              icon: Icon(LineAwesomeIcons.tags,
+                  size: 30, color: NordColors.aurora.red),
+              text: 'Categories'),
+          Tab(
+              icon: Icon(LineAwesomeIcons.cog,
+                  size: 30, color: NordColors.aurora.yellow),
+              text: 'Settings'),
         ],
         children: [
           ThingList(),
           LocationList(),
           CategoryList(),
-         SettingsList(),
+          SettingsList(),
         ],
-     ));
+      ));
 }

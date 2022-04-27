@@ -17,22 +17,25 @@ class TabBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DefaultTabController(
       length: tabs.length,
-      child:  SafeArea(
+      child: SafeArea(
           child: Scaffold(
         //backgroundColor: StuffdColors.bgColorScreen,
 
         appBar: AppBar(
           title: Text(title),
-          shadowColor: NordColors.$0,
+          shadowColor: Colors.transparent,
           centerTitle: true,
           titleTextStyle: GoogleFonts.spicyRice(
-              fontWeight: FontWeight.normal, fontSize: 40.0, color: NordColors.frost.lightest),
+              fontWeight: FontWeight.normal,
+              fontSize: 40.0,
+              color: NordColors.frost.lightest),
           bottom: TabBar(
             isScrollable: true,
             indicatorWeight: 5,
             tabs: tabs,
             indicatorColor: NordColors.aurora.purple,
-            labelStyle: GoogleFonts.secularOne( fontWeight: FontWeight.normal, fontSize: 12.0),
+            labelStyle: GoogleFonts.secularOne(
+                fontWeight: FontWeight.normal, fontSize: 12.0),
           ),
         ),
         body: Column(
